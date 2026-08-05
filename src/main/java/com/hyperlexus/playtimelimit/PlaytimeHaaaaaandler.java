@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 
 @Mod.EventBusSubscriber
 public class PlaytimeHaaaaaandler {
@@ -76,5 +77,18 @@ public class PlaytimeHaaaaaandler {
                     Component.literal("§4[!] Warning: You will be kicked in 5 minutes."), true
             );
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        if (event.getEntity().level().isClientSide()) {
+            return;
+        }
+
+        CompoundTag oldNbt = event.getOriginal().getPersistentData();
+        CompoundTag newNbt = event.getEntity().getPersistentData();
+        newNbt.putInt("TrackedPlaytime", oldNbt.getInt("TrackedPlaytime"));
+        newNbt.putInt("resetToZeroFlag", oldNbt.getInt("resetToZeroFlag"));
+        newNbt.putInt("ServerBonusTimer", oldNbt.getInt("ServerBonusTimer"));
     }
 }
