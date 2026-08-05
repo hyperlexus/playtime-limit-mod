@@ -1,0 +1,9 @@
+license = "MIT"
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+[[mods]]
+modId="playtimelimit"
+version="1.0.3"
+displayName="PlaytimeLimitMod"
+authors="HyperLexus"
+description='''Enforces a playtime. I wrote a mod for this fuckass server blud'''
