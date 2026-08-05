@@ -22,9 +22,12 @@ public class PlaytimeHaaaaaandler {
         ServerLevel overworld = serverFickEvent.getServer().overworld();
         PlaytimeServerData data = PlaytimeServerData.get(overworld);
 
+
         data.serverBonusTimer++;
         if (data.serverBonusTimer >= seconds_timer) {
-            data.serverAllowedPlaytime += second_added;
+            if (data.serverAllowedPlaytime < 2147483000) {
+                data.serverAllowedPlaytime += second_added;
+            }
             data.serverBonusTimer = 0;
             data.setDirty();
         }
@@ -42,8 +45,14 @@ public class PlaytimeHaaaaaandler {
 
         ServerLevel overworld = player.server.overworld();
         PlaytimeServerData data = PlaytimeServerData.get(overworld);
-
         CompoundTag nbt = player.getPersistentData();
+
+        // if offline during last reset
+        int playerEpoch = nbt.getInt("resetToZeroFlag");
+        if (playerEpoch < data.resetToZeroFlag) {
+            nbt.putInt("TrackedPlaytime", 0);
+            nbt.putInt("resetToZeroFlag", data.resetToZeroFlag);
+        }
 
         int currentPlaytime = nbt.getInt("TrackedPlaytime") + 1;
         nbt.putInt("TrackedPlaytime", currentPlaytime);
@@ -51,20 +60,20 @@ public class PlaytimeHaaaaaandler {
         int remainingTicks = Math.max(0, data.serverAllowedPlaytime - currentPlaytime);
         if (currentPlaytime > data.serverAllowedPlaytime) {
             player.connection.disconnect(
-                    Component.literal("You have exceeded your playtime limit. Please wait before rejoining!")
+                    Component.literal("You have exceeded the playtime limit (" + PlaytimeCommand.formatInTime(currentPlaytime) + ").")
             );
             return;
         }
 
         if (remainingTicks == 60000) {
-            player.sendSystemMessage(
-                    Component.literal("§c[!] Warning: You will be kicked in 1 hour.")
+            player.displayClientMessage(
+                    Component.literal("§c[!] Warning: You will be kicked in 1 hour."), true
             );
         }
 
         if (remainingTicks == 5000) {
-            player.sendSystemMessage(
-                    Component.literal("§c[!] Warning: You will be kicked in 5 minutes.")
+            player.displayClientMessage(
+                    Component.literal("§4[!] Warning: You will be kicked in 5 minutes."), true
             );
         }
     }
